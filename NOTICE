@@ -5,6 +5,12 @@ https://github.com/qiuqiangkong/audioset_tagging_cnn
 Copyright (c) 2018-2020 Qiuqiang Kong; MIT license retained in LICENSE.
 Copyright (c) 2026 openmirlab contributors; MIT.
 
+Sinc resampling uses the unchanged three-function pure-Torch closure from
+TorchAudio 2.7.1, pytorch/audio commit95c61b4168fc5133be8dd8c1337d929d066ae6cf.
+Copyright (c) 2017 Facebook Inc. (Soumith Chintala); BSD-2-Clause.
+Full copyright, conditions and disclaimer: licenses/TORCHAUDIO_LICENSE.txt.
+TorchAudio's binary runtime is not included or required.
+
 PANNs research authors: Qiuqiang Kong, Yin Cao, Turab Iqbal, Yuxuan Wang,
 Wenwu Wang, Mark D. Plumbley.
 PANNs: Large-Scale Pretrained Audio Neural Networks for Audio Pattern Recognition.

@@ -9,10 +9,10 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torchaudio.functional import resample
 
 from ..results import AudioInfo
 from .model import MIN_SAMPLES, SAMPLE_RATE
+from .resample import resample
 
 
 def normalize_audio(audio, sample_rate, device):
