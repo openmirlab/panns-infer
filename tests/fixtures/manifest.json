@@ -7,7 +7,7 @@
     "channels": 1,
     "duration_seconds": 5,
     "license": "CC0-1.0",
-    "source": "tools/capture_baseline.py",
+    "source": "openmirlab/conette-infer generated CC0 regression audio",
     "natural_recording": false
   },
   {
@@ -18,7 +18,7 @@
     "channels": 1,
     "duration_seconds": 5,
     "license": "CC0-1.0",
-    "source": "tools/capture_baseline.py",
+    "source": "openmirlab/conette-infer generated CC0 regression audio",
     "natural_recording": false
   },
   {
@@ -29,7 +29,7 @@
     "channels": 2,
     "duration_seconds": 5,
     "license": "CC0-1.0",
-    "source": "tools/capture_baseline.py",
+    "source": "openmirlab/conette-infer generated CC0 regression audio",
     "natural_recording": false
   },
   {
@@ -40,7 +40,7 @@
     "channels": 1,
     "duration_seconds": 5,
     "license": "CC0-1.0",
-    "source": "tools/capture_baseline.py",
+    "source": "openmirlab/conette-infer generated CC0 regression audio",
     "natural_recording": false
   },
   {
@@ -51,7 +51,7 @@
     "channels": 2,
     "duration_seconds": 5,
     "license": "CC0-1.0",
-    "source": "tools/capture_baseline.py",
+    "source": "openmirlab/conette-infer generated CC0 regression audio",
     "natural_recording": false
   }
 ]

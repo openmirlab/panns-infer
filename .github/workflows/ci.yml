@@ -1,0 +1,49 @@
+# Verify offline contracts on the supported Python matrix and installed wheels.
+# Real-model tests are explicit opt-in downloads from the original CC-BY4 host.
+# Reads: project metadata, fixtures, package checkpoint registry and test suite.
+name: Verification
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Download official CC-BY4 weights and run CPU model tests
+        type: boolean
+        default: false
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install torch==2.7.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install numpy==2.2.6 '.[dev]'
+      - run: python -m pytest -q
+      - run: python -m ruff check . && python -m ruff format --check .
+      - run: python -m build
+      - run: python -m pip install --force-reinstall --no-deps dist/*.whl
+      - run: cd /tmp && python -I -c 'from panns_infer import PANNsSession, __version__; s=PANNsSession(offline=True); s.close(); assert s.status == "closed"'
+  model:
+    if: github.event_name == 'workflow_dispatch' && inputs.model
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install torch==2.7.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install numpy==2.2.6 '.[dev]'
+      - run: |
+          python - <<'PY'
+          from panns_infer.checkpoints import CheckpointStore
+          CheckpointStore(cache_dir='local/model-cache').resolve()
+          PY
+      - run: PANNS_TEST_CHECKPOINT_DIR=local/model-cache/cnn14-zenodo-3987831 PANNS_TEST_DEVICE=cpu python -m pytest -q
+      - run: python -m build && python -m pip install --force-reinstall --no-deps dist/*.whl
+      - run: python -I tools/verify_installed_e2e.py --checkpoint-dir local/model-cache/cnn14-zenodo-3987831 --device cpu

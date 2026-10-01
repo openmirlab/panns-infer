@@ -10,3 +10,11 @@ local/
 *.bin
 *.safetensors
 .env*
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.npz
+*.npy
+!tests/fixtures/audio/*.wav
+!tests/fixtures/baseline_*/*.npz
