@@ -1,0 +1,10 @@
+{
+  "upstream": "qiuqiangkong/audioset_tagging_cnn",
+  "source_revision": "d2f4b8c18eab44737fcc0de1248ae21eb43f6aa4",
+  "torch": "1.13.1+cu117",
+  "torchaudio": "0.13.1+cu117",
+  "numpy": "1.26.4",
+  "device": "cuda:0",
+  "checkpoint_sha256": "0dc499e40e9761ef5ea061ffc77697697f277f6a960894903df3ada000e34b31",
+  "normalization": "soundfile float32; channel mean before torchaudio functional resample to32000; upstream model exact evaluation path; historic librosa file resampling not claimed"
+}
