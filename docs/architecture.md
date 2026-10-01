@@ -45,3 +45,53 @@ inclusion and absence of weights, audiofixtures, research tools or tests from
 the wheel. The sdist includes authorizedCC0 fixtures and test/tool sources,
 without modelweights, environments, private recordings or local reports.
 These are package E2E checks, not a hosted-service or resource-budget acceptance.
+
+# Additive lifecycle and normalization changes
+
+A scoped boundary review found one provenance warning: expected mutable cache
+metadata included local paths. `loaded_checkpoint_info()` resolves this with
+a path-free successful-load snapshot, shared session lock and defensive copy;
+it never performs file inspection or model loading.
+
+Optional short-input padding is owned by the existing normalization boundary,
+after unchanged channel averaging and resampling. Default rejection remains;
+source coverage and synthetic padding are recorded separately. CPU/CUDA tests
+compare every score and embedding bit-exactly against independently normalized
+and manually right-padded inputs at 16, 32 and 44.1 kHz for all input types.
+
+The three-function TorchAudio 2.7.1 resampling closure is copied verbatim, with
+its pinned BSD-2-Clause source/license retained. Seeded CC0 CPU/CUDA fixtures
+were recorded before extraction; source equality and live float32/float64 A/B
+checks pass bit-exactly. The runtime has no TorchAudio dependency. The narrower
+pure-Torch boundary introduces no algorithm, precision or ordering changes.
+Python 3.13/Torch 2.13 CPU, without TorchAudio installed, passes 72 tests;
+12 recording-environment/reference-only tests skip explicitly at that checkpoint.
+Container resource budgets remain unverified.
+
+# Target CUDA runtime and duration feasibility
+
+A local CUDA 13.0/Ubuntu 24.04 Docker container on RTX 4090 (driver 595.84)
+verified the installed wheel with Python 3.13.15, Torch 2.13.0+cu130 and NumPy
+2.5.3. TorchAudio imports were actively blocked. The full real-checkpoint GPU
+suite passed 74 tests; 12 optional original-reference or recording-build checks
+skipped explicitly. Installed API/CLI E2E passed all five original fixtures,
+all 527 scores and 2,048 embedding components, opt-in padding against manual
+normalized input, resident provenance and release/reload/terminal close.
+
+Synthetic Gaussian inputs of 1, 10, 30, 60 and 120 seconds completed with
+finite scores. Selected Torch allocator measurements were:
+
+| Input duration | Peak allocated bytes | Peak reserved bytes |
+|---|---:|---:|
+| 10 seconds | 758,325,248 | 1,184,890,880 |
+| 120 seconds | 944,642,560 | 1,184,890,880 |
+
+After releasing the model, its weak reference cleared and allocated memory
+returned to 8,519,680 bytes, matching an independently established framework
+baseline from a plain 32×32 matrix multiplication. The container process
+terminated after verification. The measured image content ID was
+`167ea96ddbbd7f96dab67217546e22fc810fc71080fd412506673193e3d784eb`.
+
+These are native execution-feasibility and Torch allocator observations from
+single forwards with mixed warmup state. They are not whole-GPU/NVML peaks,
+host RAM, deployment budgets, recognition quality or latency benchmarks.

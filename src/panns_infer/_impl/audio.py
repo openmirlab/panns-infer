@@ -1,7 +1,7 @@
 """One validated file/waveform normalization boundary for PANNs CNN14.
 
 File metadata is authoritative; arrays use channel-first shape and explicit rate.
-Float32 channel averaging precedes resampling; inputs are never silently padded.
+Float32 channel averaging precedes resampling; short padding requires explicit opt-in.
 Reads: SoundFile audio paths, NumPy/Torch waveforms and their sample rates.
 """
 
@@ -15,7 +15,9 @@ from .model import MIN_SAMPLES, SAMPLE_RATE
 from .resample import resample
 
 
-def normalize_audio(audio, sample_rate, device):
+def normalize_audio(audio, sample_rate, device, *, pad_short=False):
+    if type(pad_short) is not bool:
+        raise ValueError("pad_short must be a bool")
     if isinstance(audio, (str, Path)):
         import soundfile as sf
 
@@ -46,7 +48,6 @@ def normalize_audio(audio, sample_rate, device):
         raise ValueError("Audio contains NaN or infinite samples")
     channels = 1 if waveform.ndim == 1 else waveform.shape[0]
     samples = waveform.shape[-1]
-    info = AudioInfo(sample_rate, channels, samples, samples / sample_rate)
     # Normalize on CPU like the recorded upstream-model input; model/device
     # transfer follows resampling, keeping file/array/device input consistent.
     waveform = waveform.detach().to(device="cpu", dtype=torch.float32)
@@ -54,8 +55,22 @@ def normalize_audio(audio, sample_rate, device):
         waveform = waveform.mean(dim=0)
     if sample_rate != SAMPLE_RATE:
         waveform = resample(waveform, sample_rate, SAMPLE_RATE)
-    if waveform.numel() < MIN_SAMPLES:
-        raise ValueError(
-            f"CNN14 requires at least {MIN_SAMPLES} normalized samples (~0.31 seconds)"
-        )
+    normalized_samples = waveform.numel()
+    padding_samples = max(0, MIN_SAMPLES - normalized_samples)
+    if padding_samples:
+        if not pad_short:
+            raise ValueError(
+                f"CNN14 requires at least {MIN_SAMPLES} normalized samples (~0.31 seconds)"
+            )
+        waveform = torch.nn.functional.pad(waveform, (0, padding_samples))
+    info = AudioInfo(
+        sample_rate,
+        channels,
+        samples,
+        samples / sample_rate,
+        normalized_samples=normalized_samples,
+        model_samples=waveform.numel(),
+        padding_samples=padding_samples,
+        padding_seconds=padding_samples / SAMPLE_RATE,
+    )
     return waveform[None].to(device), info

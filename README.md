@@ -57,7 +57,8 @@ forever. This repository contains inference code and verification fixtures.
 
 ## Install
 
-Python 3.10 or newer; Torch and torchaudio 2.7.1 or newer; NumPy 2 is supported.
+Python 3.10 or newer; Torch 2.7.1 or newer; NumPy 2 is supported.
+TorchAudio is not a runtime dependency.
 This package is currently private and has not been published to PyPI. From an
 authorized checkout:
 
@@ -65,10 +66,13 @@ authorized checkout:
 python -m pip install .
 ```
 
-Select matching Torch/torchaudio builds for your CPU or CUDA environment using
+Select a Torch build for your CPU or CUDA environment using
 [PyTorch's installation instructions](https://pytorch.org/get-started/locally/).
-Torch 2.7.1 CPU/CUDA model parity is tested locally; the CI Python matrix is
-3.10–3.13. Versions above the tested floor are not capped, but each new backend
+Torch 2.7.1 CPU/CUDA and Python 3.13/Torch 2.13 CPU/CUDA model parity are tested
+locally without requiring TorchAudio. Torch 2.13 CUDA checks ran in a local
+CUDA 13.0 container on RTX 4090, including installed-wheel API/CLI, embeddings,
+short padding and release/reload. The CI Python matrix is 3.10–3.13. Versions above the
+tested floor are not capped, but each new backend
 combination still needs the numerical verification below.
 
 ## Quick Start
@@ -109,13 +113,27 @@ with PANNsSession(device="cpu") as session:
     result = session.infer(waveform, sample_rate=32000)
 ```
 
-SoundFile decodes to float32; channels are averaged on CPU, then torchaudio's
-functional resampler converts to 32 kHz before transfer to the selected model
-device. File, array and tensor inputs share this boundary. No clipping, gain
-normalization or padding is added. CNN14 requires at least 9,920 normalized
+SoundFile decodes to float32; channels are averaged on CPU, then the unchanged
+pure-Torch sinc resampling functions extracted from TorchAudio 2.7.1 convert to
+32 kHz before transfer to the selected model
+device. File, array and tensor inputs share this boundary. No clipping or gain
+normalization is added. CNN14 requires at least 9,920 normalized
 samples (about 0.31 seconds) to survive its five temporal pooling stages.
+Shorter inputs raise by default. To opt into right-zero padding **after** mono
+conversion and resampling, use `session.infer(audio, pad_short=True)` or CLI
+`--pad-short`. `pad_short` must be a boolean; empty and nonfinite audio still
+raise. Valid inputs at or above the minimum are unchanged.
+The original source duration is preserved in `audio`; `normalized_samples`
+counts resampled samples before padding, `model_samples` counts the final model
+input, and `padding_samples`/`padding_seconds` report added context at 32 kHz.
+Scores and embeddings then describe that padded input; added silence is
+synthesized context, not additional observed audio coverage.
 There is no claimed maximum duration; cost grows with input duration and
 long recordings have not been certified for deployment or quality.
+Synthetic 1, 10, 30, 60 and 120-second inputs completed in the local Torch 2.13
+CUDA container with finite native scores. These are execution-feasibility
+checks, not recognition-quality, latency or deployment-budget measurements;
+see the [verification record](docs/architecture.md).
 
 This normalization policy is explicit. Historical upstream `librosa.load`
 resampling is not claimed to be identical. Numerical model parity is checked
@@ -131,7 +149,7 @@ on the same recorded normalized waveforms; normalization is checked separately.
 | `ranked_tags` | Read-only descending ranking; equal scores use class index |
 | `embedding` | All 2,048 native float32 components as a tuple of Python floats |
 | `embedding_shape`, `embedding_dtype`, `embedding_meaning` | `(2048,)`, `float32`, native representation description |
-| `audio` | Original rate, channel count, samples, duration and model sample rate |
+| `audio` | Original rate/channels/samples/duration, model rate, normalized/model sample counts and explicit padding |
 | `checkpoint` | Repository, release identity, upstream revision and artifact hashes |
 
 The embedding is the original CNN14 `embedding` output: max-over-time plus
@@ -151,6 +169,17 @@ Use any task-specific normalization explicitly after obtaining this vector.
 | `status` | `new`, `loading`, `ready`, `busy`, `failed`, `released`, `closed` |
 | `device` | Concrete loaded device, or `None` when no model is resident |
 | `cache_info()` | Read-only asset paths/existence/expected identity; never downloads |
+| `loaded_checkpoint_info()` | Ready-only, portable provenance captured by successful verified loading; no file access |
+
+`loaded_checkpoint_info()` returns a fresh dictionary containing `model_id`
+(`panns-cnn14`), `checkpoint_id` (`repo@revision`), `checkpoint_sha256` and the
+resolved `device`, plus the checkpoint repository/revisions, license metadata
+and `files` identities (SHA256, size and source URL). It contains no local paths.
+It describes the resident model even if the configuration or cached files later
+change; nested returned values can be edited without changing the session.
+Calls serialize with inference and raise `RuntimeError` before successful
+loading or after release/close. Unlike `cache_info()`, this reports the verified
+load snapshot rather than current cache existence or expected configuration.
 
 `device` accepts `auto`, `cpu`, `cuda` and `cuda:N`. Auto selects CUDA device 0
 when available, otherwise CPU. Explicit unavailable CUDA choices raise;
@@ -237,6 +266,10 @@ python -m build
 ```
 
 Real-model tests are explicitly skipped without a local checkpoint directory;
+live comparisons against the original TorchAudio 2.7.1 are optional developer
+checks and skip explicitly if that reference is absent or its binary cannot
+load (ImportError/OSError). Package normalization, recorded-fixture checks and
+checkpoint-enabled model tests remain independent of that optional reference.
 No test silently downloads weights. CI smoke tests cover Python 3.10–3.13.
 An opt-in model workflow downloads checksum-verified official weights and runs
 CPU integration tests. Golden CPU/CUDA fixtures were recorded under Torch
@@ -258,7 +291,12 @@ behavior, not real-world accuracy or a container resource budget.
 
 ## License
 
-Code is MIT; original copyright notices are preserved in [LICENSE](LICENSE)
+Original PANNs and package code is MIT; the verbatim pure-Torch sinc resampler
+from [TorchAudio](https://github.com/pytorch/audio/tree/95c61b4168fc5133be8dd8c1337d929d066ae6cf)
+is BSD-2-Clause, Copyright (c) 2017 Facebook Inc. (Soumith Chintala).
+The combined distribution declares `MIT AND BSD-2-Clause`; original copyright
+notices are preserved in [LICENSE](LICENSE),
+[TorchAudio license](licenses/TORCHAUDIO_LICENSE.txt)
 and [NOTICE](NOTICE). Original CNN14 checkpoint weights are **CC BY 4.0** as
 stated by the [Zenodo record](https://zenodo.org/records/3987831), distinct from
 the code license. AudioSet dataset and ontology terms are separate (CC BY 4.0
@@ -267,6 +305,6 @@ Weights are downloaded from their original hosts and are not redistributed here.
 
 ## Support
 
-For package bugs, report the Python/Torch/torchaudio build, selected device,
+For package bugs, report the Python/Torch build, selected device,
 checkpoint provenance and a reproducible permitted input. For the research
 model and paper, refer to the original PANNs repository above.
