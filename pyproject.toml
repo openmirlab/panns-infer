@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "panns-infer"
+dynamic = ["version"]
+description = "Independent PANNs CNN14 AudioSet tagging and native audio embeddings"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "Qiuqiang Kong"}, {name = "Yin Cao"}, {name = "Turab Iqbal"}, {name = "Yuxuan Wang"}, {name = "Wenwu Wang"}, {name = "Mark D. Plumbley"}]
+maintainers = [{name = "openmirlab"}]
+# 2.7.1 is the first model-parity-tested modern Torch/torchaudio pair here.
+dependencies = ["torch>=2.7.1", "torchaudio>=2.7.1", "numpy>=1.26", "soundfile>=0.12", "filelock>=3.13"]
+classifiers = ["Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build>=1.2", "ruff>=0.12"]
+
+[project.scripts]
+panns-infer = "panns_infer.cli:main"
+
+[project.urls]
+Source = "https://github.com/openmirlab/panns-infer"
+Upstream = "https://github.com/qiuqiangkong/audioset_tagging_cnn"
+
+[tool.hatch.version]
+path = "src/panns_infer/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/panns_infer"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/tools", "/docs", "/.github", "/README.md", "/CLAUDE.md", "/CHANGELOG.md", "/LICENSE", "/NOTICE", "/pyproject.toml"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = ["model: real checkpoint integration and numerical parity", "network: artifact URL liveness"]
+
+[tool.ruff]
+line-length = 100

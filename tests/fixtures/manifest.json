@@ -1,0 +1,57 @@
+[
+  {
+    "id": "silence",
+    "path": "audio/silence_32000_1ch.wav",
+    "sha256": "957ef2634fa5473472144eaa0333d7a170af869367865690fb6032c70e89ce38",
+    "sample_rate": 32000,
+    "channels": 1,
+    "duration_seconds": 5,
+    "license": "CC0-1.0",
+    "source": "tools/capture_baseline.py",
+    "natural_recording": false
+  },
+  {
+    "id": "low_noise",
+    "path": "audio/low_noise_16000_1ch.wav",
+    "sha256": "0ccc8dd8367fadf482beabab49010f7d19a7bf37c272a76230e610345c3df453",
+    "sample_rate": 16000,
+    "channels": 1,
+    "duration_seconds": 5,
+    "license": "CC0-1.0",
+    "source": "tools/capture_baseline.py",
+    "natural_recording": false
+  },
+  {
+    "id": "tonal_sequence",
+    "path": "audio/tonal_sequence_44100_2ch.wav",
+    "sha256": "6d2081952ad5e167f3148f48f728358c19fa3ad51708fe51f80a7b38df3fe5a6",
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 5,
+    "license": "CC0-1.0",
+    "source": "tools/capture_baseline.py",
+    "natural_recording": false
+  },
+  {
+    "id": "modulated_harmonics",
+    "path": "audio/modulated_harmonics_48000_1ch.wav",
+    "sha256": "740f749824c472ab54e40a928b1e9f5a32dcc1c9dcf6d3e76983b3d98dbfe914",
+    "sample_rate": 48000,
+    "channels": 1,
+    "duration_seconds": 5,
+    "license": "CC0-1.0",
+    "source": "tools/capture_baseline.py",
+    "natural_recording": false
+  },
+  {
+    "id": "noise_events",
+    "path": "audio/noise_events_22050_2ch.wav",
+    "sha256": "aa81bd094a47fb6c3917e0602c2aaf54c6fe68585e61963cfd7c49d388954461",
+    "sample_rate": 22050,
+    "channels": 2,
+    "duration_seconds": 5,
+    "license": "CC0-1.0",
+    "source": "tools/capture_baseline.py",
+    "natural_recording": false
+  }
+]
