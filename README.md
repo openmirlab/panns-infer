@@ -237,7 +237,7 @@ python -m build
 ```
 
 Real-model tests are explicitly skipped without a local checkpoint directory;
-o test silently downloads weights. CI smoke tests cover Python 3.10–3.13.
+No test silently downloads weights. CI smoke tests cover Python 3.10–3.13.
 An opt-in model workflow downloads checksum-verified official weights and runs
 CPU integration tests. Golden CPU/CUDA fixtures were recorded under Torch
 1.13.1 before porting; every native score and embedding component is compared
