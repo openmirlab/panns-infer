@@ -29,3 +29,19 @@ embeddings by 6.03e-6 on the recorded fixture set. These are controlled
 cross-version differences, not a changed frontend algorithm; checkpoint filters
 and eval graph remain identical. These measurements are not bit-exact claims
 on other builds/hardware.
+
+# Completed package verification
+
+The public facade and CLI were tested from a wheel built **from sdist**:
+Python3.10/Torch2.7.1+cpu and Python3.11/Torch2.7.1+cu126 with NumPy2.2.6.
+All five file inputs match original native527scores and2048embedding components;
+file/array/tensor results agree, fullCLIJSON is checked against API output,
+network access is forbidden for offline resolution, and release/reload plus
+terminal close pass. CPU and CUDA each pass52tests. Installed result vectors
+remain available and JSON-serializable after releasing the resident model.
+
+Archive inspection confirms registry plus MIT/NOTICE/torchlibrosa license
+inclusion and absence of weights, audiofixtures, research tools or tests from
+the wheel. The sdist includes authorizedCC0 fixtures and test/tool sources,
+without modelweights, environments, private recordings or local reports.
+These are package E2E checks, not a hosted-service or resource-budget acceptance.

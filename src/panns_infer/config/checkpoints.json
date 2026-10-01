@@ -1,0 +1,29 @@
+{
+  "repo": "qiuqiangkong/audioset_tagging_cnn",
+  "revision": "cnn14-zenodo-3987831",
+  "source_revision": "d2f4b8c18eab44737fcc0de1248ae21eb43f6aa4",
+  "updated_at": "2026-10-01",
+  "model_license": "CC-BY-4.0",
+  "model_license_source": "https://zenodo.org/records/3987831",
+  "audioset_licenses": {
+    "dataset": "CC-BY-4.0",
+    "ontology": "CC-BY-SA-4.0",
+    "source": "https://research.google.com/audioset/download.html"
+  },
+  "files": {
+    "Cnn14.pth": {
+      "sha256": "0dc499e40e9761ef5ea061ffc77697697f277f6a960894903df3ada000e34b31",
+      "size": 327428481,
+      "url": "https://zenodo.org/records/3987831/files/Cnn14_mAP%3D0.431.pth?download=1",
+      "license": "CC-BY-4.0",
+      "provenance": "Official Zenodo record3987831; officialMD5 541141fa2ee191a88f24a3219fff024e verified"
+    },
+    "class_labels_indices.csv": {
+      "sha256": "cdd1049833c4b86127c2773ac0d14a2754b6a6d0d1798002ed5c66e699708429",
+      "size": 14675,
+      "url": "https://storage.googleapis.com/us_audioset/youtube_corpus/v1/csv/class_labels_indices.csv",
+      "license": "CC-BY-4.0 / CC-BY-SA-4.0",
+      "provenance": "Official AudioSet527class labelmapping"
+    }
+  }
+}
