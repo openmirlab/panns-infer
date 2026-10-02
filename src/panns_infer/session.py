@@ -5,6 +5,7 @@ Torch imports lazily; closing is terminal, while releasing permits reloading.
 Reads: artifact resolver, private model/audio boundary and portable result contracts.
 """
 
+import copy
 import csv
 import gc
 import threading
@@ -47,6 +48,7 @@ class PANNsSession:
         self._lock = threading.RLock()
         self._status = "new"
         self._model = self._device = self._labels = self._label_ids = self._checkpoint = None
+        self._loaded_provenance = None
 
     @property
     def status(self):
@@ -58,6 +60,18 @@ class PANNsSession:
 
     def cache_info(self):
         return self._store.cache_info()
+
+    def loaded_checkpoint_info(self):
+        """Return a portable snapshot of the successfully loaded model's provenance.
+
+        Ready-only and serialized with inference; never touches checkpoint files.
+        Returned nested values are independent of the session and contain no paths.
+        """
+        with self._lock:
+            self._require_open()
+            if self._status != "ready":
+                raise RuntimeError("Call load() successfully before loaded_checkpoint_info()")
+            return copy.deepcopy(self._loaded_provenance)
 
     def _require_open(self):
         if self._status == "closed":
@@ -92,6 +106,14 @@ class PANNsSession:
                     provenance["source_revision"],
                     tuple((name, meta["sha256"]) for name, meta in provenance["files"].items()),
                 )
+                for artifact in provenance["files"].values():
+                    artifact.pop("path")
+                provenance.update(
+                    model_id="panns-cnn14",
+                    checkpoint_id=f"{checkpoint.repo}@{checkpoint.revision}",
+                    checkpoint_sha256=dict(checkpoint.artifacts)["Cnn14.pth"],
+                    device=str(device),
+                )
             except Exception:
                 self._status = "failed"
                 raise
@@ -99,19 +121,22 @@ class PANNsSession:
             self._labels = tuple(labels[i] for i in range(CLASSES))
             self._label_ids = tuple(mids[i] for i in range(CLASSES))
             self._checkpoint = checkpoint
+            self._loaded_provenance = provenance
             self._status = "ready"
             return self
 
-    def infer(self, audio, *, sample_rate=None):
+    def infer(self, audio, *, sample_rate=None, pad_short=False):
         with self._lock:
             self._require_open()
             if self._status != "ready":
                 raise RuntimeError("Call load() successfully before infer()")
+            if type(pad_short) is not bool:
+                raise ValueError("pad_short must be a bool")
             import torch
 
             from ._impl.audio import normalize_audio
 
-            waveform, info = normalize_audio(audio, sample_rate, self._device)
+            waveform, info = normalize_audio(audio, sample_rate, self._device, pad_short=pad_short)
             self._status = "busy"
             try:
                 with torch.inference_mode():
@@ -130,6 +155,7 @@ class PANNsSession:
     def _release_model(self):
         device = self._device
         self._model = self._device = self._labels = self._label_ids = self._checkpoint = None
+        self._loaded_provenance = None
         gc.collect()
         if device is not None:
             import torch

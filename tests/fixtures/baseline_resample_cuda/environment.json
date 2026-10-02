@@ -1,0 +1,117 @@
+{
+  "license": "CC0-1.0",
+  "seed": 20261001,
+  "source_revision": "95c61b4168fc5133be8dd8c1337d929d066ae6cf",
+  "source_sha256": "73caabde698f5cb8b8d0de0d08b7291ef41e508ba836d6ecce4b23b6bb82d798",
+  "fixture_sha256": "e7dacc2f119fc6aaf8b06ccbcac4bf73a169acca46e0116608527abfc4aa73ea",
+  "torch": "2.7.1+cu126",
+  "torchaudio": "2.7.1+cu126",
+  "device": "cuda:0",
+  "machine": "x86_64",
+  "threads": 4,
+  "hardware": "NVIDIA GeForce RTX 4090",
+  "tf32": false,
+  "cases": [
+    {
+      "id": "r8000_n17_c1",
+      "sample_rate": 8000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r8000_n17_c2",
+      "sample_rate": 8000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r8000_n2479_c1",
+      "sample_rate": 8000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r8000_n2479_c2",
+      "sample_rate": 8000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r16000_n17_c1",
+      "sample_rate": 16000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r16000_n17_c2",
+      "sample_rate": 16000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r16000_n4959_c1",
+      "sample_rate": 16000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r16000_n4959_c2",
+      "sample_rate": 16000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r22050_n17_c1",
+      "sample_rate": 22050,
+      "target_rate": 32000
+    },
+    {
+      "id": "r22050_n17_c2",
+      "sample_rate": 22050,
+      "target_rate": 32000
+    },
+    {
+      "id": "r22050_n6835_c1",
+      "sample_rate": 22050,
+      "target_rate": 32000
+    },
+    {
+      "id": "r22050_n6835_c2",
+      "sample_rate": 22050,
+      "target_rate": 32000
+    },
+    {
+      "id": "r44100_n17_c1",
+      "sample_rate": 44100,
+      "target_rate": 32000
+    },
+    {
+      "id": "r44100_n17_c2",
+      "sample_rate": 44100,
+      "target_rate": 32000
+    },
+    {
+      "id": "r44100_n13670_c1",
+      "sample_rate": 44100,
+      "target_rate": 32000
+    },
+    {
+      "id": "r44100_n13670_c2",
+      "sample_rate": 44100,
+      "target_rate": 32000
+    },
+    {
+      "id": "r48000_n17_c1",
+      "sample_rate": 48000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r48000_n17_c2",
+      "sample_rate": 48000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r48000_n14879_c1",
+      "sample_rate": 48000,
+      "target_rate": 32000
+    },
+    {
+      "id": "r48000_n14879_c2",
+      "sample_rate": 48000,
+      "target_rate": 32000
+    }
+  ],
+  "cpu_capability": "AVX2"
+}

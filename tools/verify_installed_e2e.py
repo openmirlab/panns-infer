@@ -11,6 +11,7 @@ import subprocess
 import sys
 from dataclasses import asdict
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import soundfile as sf
@@ -18,6 +19,7 @@ import torch
 
 import panns_infer
 from panns_infer import PANNsSession, checkpoints
+from panns_infer._impl.resample import resample
 
 p = argparse.ArgumentParser()
 p.add_argument("--checkpoint-dir", type=Path, required=True)
@@ -32,6 +34,7 @@ checkpoints.urlopen = lambda *args, **kwargs: (_ for _ in ()).throw(
 )
 root = Path(__file__).resolve().parents[1] / "tests/fixtures"
 records = {}
+code = "import torch; torch.set_num_threads(4); torch.backends.cuda.matmul.allow_tf32=False; torch.backends.cudnn.allow_tf32=False; from panns_infer.cli import main; main()"
 with PANNsSession(device=a.device, checkpoint_dir=a.checkpoint_dir, offline=True) as session:
     assert session.status == "new"
     try:
@@ -41,9 +44,15 @@ with PANNsSession(device=a.device, checkpoint_dir=a.checkpoint_dir, offline=True
     else:
         raise AssertionError("infer must require ready")
     session.load()
+    loaded = session.loaded_checkpoint_info()
+    assert loaded["model_id"] == "panns-cnn14"
+    assert loaded["checkpoint_sha256"] == loaded["files"]["Cnn14.pth"]["sha256"]
+    assert loaded["device"] == session.device
+    assert all("path" not in artifact for artifact in loaded["files"].values())
     for f in json.loads((root / "manifest.json").read_text()):
         path = root / f["path"]
         result = session.infer(path)
+        assert dict(result.checkpoint.artifacts)["Cnn14.pth"] == loaded["checkpoint_sha256"]
         gold = np.load(root / ("baseline_" + a.device.split(":")[0]) / (f["id"] + ".npz"))
         np.testing.assert_allclose(result.scores, gold["clipwise_output"][0], rtol=1e-4, atol=1e-4)
         np.testing.assert_allclose(result.embedding, gold["embedding"][0], rtol=1e-4, atol=1e-4)
@@ -54,6 +63,43 @@ with PANNsSession(device=a.device, checkpoint_dir=a.checkpoint_dir, offline=True
             assert session.infer(audio, sample_rate=rate) == result
         records[f["id"]] = result
     path = root / "audio/silence_32000_1ch.wav"
+    time = np.arange(1600, dtype=np.float32) / 16000
+    short_audio = np.stack(
+        [0.1 * np.sin(2 * np.pi * 440 * time), 0.05 * np.cos(2 * np.pi * 220 * time)]
+    )
+    manual = resample(torch.from_numpy(short_audio).mean(dim=0), 16000, 32000)
+    manual = torch.nn.functional.pad(manual, (0, 9920 - manual.numel()))
+    expected_short = session.infer(manual, sample_rate=32000)
+    with TemporaryDirectory() as temporary:
+        short_path = Path(temporary) / "short.wav"
+        sf.write(short_path, short_audio.T, 16000, subtype="FLOAT")
+        short = session.infer(short_path, pad_short=True)
+        assert short.scores == expected_short.scores
+        assert short.embedding == expected_short.embedding
+        assert short.audio.normalized_samples == 3200
+        assert short.audio.model_samples == 9920
+        assert short.audio.padding_samples == 6720
+        assert short.audio.duration_seconds == 0.1
+        short_cli = subprocess.run(
+            [
+                sys.executable,
+                "-I",
+                "-c",
+                code,
+                str(short_path),
+                "--device",
+                a.device,
+                "--checkpoint-dir",
+                str(a.checkpoint_dir),
+                "--offline",
+                "--pad-short",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        short_payload = json.loads(short_cli.stdout)
+        assert short_payload == json.loads(json.dumps(asdict(short)))
     for audio in [root / "missing.wav", np.array([float("nan")], dtype=np.float32)]:
         try:
             session.infer(audio, sample_rate=32000)
@@ -64,11 +110,18 @@ with PANNsSession(device=a.device, checkpoint_dir=a.checkpoint_dir, offline=True
         assert session.status == "ready"
     session.release()
     assert session.status == "released"
+    try:
+        session.loaded_checkpoint_info()
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("loaded provenance must require ready")
     session.load()
+    assert session.loaded_checkpoint_info() == loaded
     assert session.infer(path) == records["silence"]
 assert session.status == "closed"
+assert "torchaudio" not in sys.modules
 assert len(json.loads(json.dumps(asdict(records["silence"])))["embedding"]) == 2048
-code = "import torch; torch.set_num_threads(4); torch.backends.cuda.matmul.allow_tf32=False; torch.backends.cudnn.allow_tf32=False; from panns_infer.cli import main; main()"
 cli = subprocess.run(
     [
         sys.executable,
@@ -102,6 +155,7 @@ print(
             "cli_embedding_components": 2048,
             "offline": True,
             "release_reload": True,
+            "short_padding_manual_and_cli": True,
         }
     )
 )

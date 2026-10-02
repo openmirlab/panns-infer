@@ -23,6 +23,7 @@ def main(argv=None):
     parser.add_argument("--checkpoint-dir", type=Path)
     parser.add_argument("--checkpoint-config", type=Path)
     parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--pad-short", action="store_true", help="Right-pad short audio with zeros")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--version", action="version", version=__version__)
     args = parser.parse_args(argv)
@@ -37,7 +38,7 @@ def main(argv=None):
             checkpoint_config=args.checkpoint_config,
         ) as session:
             session.load()
-            result = session.infer(args.audio)
+            result = session.infer(args.audio, pad_short=args.pad_short)
         payload = json.dumps(asdict(result), ensure_ascii=False, allow_nan=False) + "\n"
         if args.output:
             args.output.write_text(payload, encoding="utf-8")

@@ -15,6 +15,10 @@ class AudioInfo:
     samples: int
     duration_seconds: float
     model_sample_rate: int = 32000
+    normalized_samples: int | None = None
+    model_samples: int | None = None
+    padding_samples: int = 0
+    padding_seconds: float = 0.0
 
 
 @dataclass(frozen=True)
