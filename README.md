@@ -59,10 +59,11 @@ forever. This repository contains inference code and verification fixtures.
 
 Python 3.10 or newer; Torch 2.7.1 or newer; NumPy 2 is supported.
 TorchAudio is not a runtime dependency.
-This package is currently private and has not been published to PyPI. From an
-authorized checkout:
+This package has not been published to PyPI. Install it from GitHub, or from a
+checkout:
 
 ```bash
+python -m pip install "panns-infer @ git+https://github.com/openmirlab/panns-infer"
 python -m pip install .
 ```
 

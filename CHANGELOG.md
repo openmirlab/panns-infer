@@ -2,6 +2,9 @@
 
 ## Unreleased — 0.1.0
 
+- Make the GitHub repository public (2026-11-12); still not on PyPI and no weights
+  are rehosted. Document installation from GitHub.
+
 - Verify Python 3.13/Torch 2.13 CPU and CUDA 13.0 installed-wheel inference,
   embeddings, short padding and lifecycle without TorchAudio; synthetic inputs
   through 120 seconds pass execution-feasibility checks, without deployment or quality claims.
