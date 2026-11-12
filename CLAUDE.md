@@ -14,7 +14,7 @@ runtime dependency. Historical librosa file resampling is not a parity claim.
 Native embedding is post-fc1ReLU, not L2 normalized. Every component is exported
 in API/CLI JSON. No training/evaluation/datasets/notebooks or upstream tree ship.
 
-Status: unpublished private implementation. Original Torch1.13 CPU/CUDA golden
+Status: public GitHub repository since 2026-11-12, not on PyPI. Original Torch1.13 CPU/CUDA golden
 fixtures committed before extracting the core. Model/facade verified under
 Torch2.7.1 CPU/CUDA with NumPy2.2.6. No container resource budget or new quality
 study is claimed. CPU-only CI covers Python3.10–3.13; MPS is not supported.
@@ -96,9 +96,9 @@ Baseline regeneration imports the readonly original source via
 `tools/capture_baseline.py`; never edit upstream to make tests pass. Research
 baselines and synthetic assets belong in sdist/tests, never the wheel. Inspect
 both archives and git-tracked files for weights/privatepaths/secrets before push.
-Use work branches; main moves by merge. No publishing or weight rehosting.
+Use work branches; main moves by merge. No PyPI publishing or weight rehosting.
 
 Public skills check: parent inspected openmirlab-skills; its capability map
-explicitly excludes private/unreleased packages. No public package entry is
-appropriate until release; revisit install/task guidance in that same release
+excludes unreleased packages. The repository is public but unreleased on PyPI, so
+no public package entry is added yet; revisit install/task guidance in that same release
 window. No constitution amendment is silently bundled with this package.
