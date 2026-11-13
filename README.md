@@ -2,6 +2,8 @@
 
 PANNs CNN14 AudioSet tagging and native audio embeddings, as an independent inference-only package.
 
+[![Code license: MIT AND BSD-2-Clause](https://img.shields.io/badge/code%20license-MIT%20AND%20BSD--2--Clause-blue.svg)](LICENSE) [![Python: 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+
 ## Why this exists
 
 [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn) introduced reusable
@@ -59,13 +61,16 @@ forever. This repository contains inference code and verification fixtures.
 
 Python 3.10 or newer; Torch 2.7.1 or newer; NumPy 2 is supported.
 TorchAudio is not a runtime dependency.
-This package has not been published to PyPI. Install it from GitHub, or from a
-checkout:
+The GitHub source repository is public; there is no PyPI release. Install the
+current source directly:
 
 ```bash
-python -m pip install "panns-infer @ git+https://github.com/openmirlab/panns-infer"
-python -m pip install .
+python -m pip install 'panns-infer @ git+https://github.com/openmirlab/panns-infer.git'
 ```
+
+From a local checkout, `python -m pip install .` also works. The checkpoint is
+still downloaded from the official Zenodo record under its separate CC BY 4.0
+terms; public source access does not change those weight terms.
 
 Select a Torch build for your CPU or CUDA environment using
 [PyTorch's installation instructions](https://pytorch.org/get-started/locally/).
